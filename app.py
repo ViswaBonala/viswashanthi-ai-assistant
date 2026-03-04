@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from openai import OpenAI
 import os
@@ -19,9 +19,17 @@ Implemented automated validation reducing defects by 70%.
 Strong in SQL, Python, Informatica, Snowflake, GCP,  A/B Testing.
 """
 
+# Serve frontend
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+# Chat endpoint
 @app.route("/chat", methods=["POST"])
 def chat():
     user_question = request.json.get("question")
+    if not user_question:
+        return jsonify({"answer": "Please provide a question"}), 400
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -34,4 +42,5 @@ def chat():
     return jsonify({"answer": response.choices[0].message.content})
 
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
