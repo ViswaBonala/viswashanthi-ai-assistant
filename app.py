@@ -27,20 +27,26 @@ def index():
 # Chat endpoint
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_question = request.json.get("question")
-    if not user_question:
-        return jsonify({"answer": "Please provide a question"}), 400
+    try:
+        user_question = request.json.get("question")
+        if not user_question:
+            return jsonify({"answer": "Please provide a question"}), 400
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a professional AI assistant representing ETL Lead Viswashanthi Bonala. Respond concisely and professionally."},
-            {"role": "user", "content": f"Context:\n{resume_context}\n\nQuestion:\n{user_question}"}
-        ]
-    )
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a professional AI assistant representing ETL Lead Viswashanthi Bonala. Respond concisely and professionally."},
+                {"role": "user", "content": f"Context:\n{resume_context}\n\nQuestion:\n{user_question}"}
+            ]
+        )
 
-    return jsonify({"answer": response.choices[0].message.content})
+        return jsonify({"answer": response.choices[0].message.content})
+
+    except Exception as e:
+        print("ERROR:", str(e))  # This will show in Render logs
+        return jsonify({"answer": "Sorry, AI service is temporarily unavailable."}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
