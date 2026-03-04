@@ -90,15 +90,21 @@
 <script>
 async function askAI() {
     const question = document.getElementById("question").value;
+    if (!question) return alert("Please type a question");
 
-    const res = await fetch("https://viswashanthi-ai-assistant.onrender.com/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question })
-    });
+    try {
+        const res = await fetch("/chat", {   // same domain, no full URL needed
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question })
+        });
 
-    const data = await res.json();
-    document.getElementById("response").innerText = data.answer;
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        const data = await res.json();
+        document.getElementById("response").innerText = data.answer;
+    } catch (err) {
+        document.getElementById("response").innerText = err.message;
+    }
 }
 </script>
 </body>
